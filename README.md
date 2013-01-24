@@ -27,9 +27,17 @@ For information of how to install pik see [pik-github](https://github.com/vertig
 
 Bundler is used to keep all of the gems required in sync. To install bundler run ```gem install bundler```. Once bundler is installed cd into the project directory and run ```bundle install``` to install all the required gems.
 
+#### Database
+
+The API is built using a Postgres database, mostly because it's the best open source SQL option out there and we get a free dev instance when we will launch this on Heroku. Google how to set up Postgres the internet is filled with tutorials for each platform, for OSX I would suggest [Postgres.app](http://postgresapp.com/).
+
+Once the database is installed make sure it is running and create a database named: ```coupon```. For dev purposes I did not put a password requirement on the database.
+
+The run the ```CREATE TABLE``` statements in ```tables.sql``` to build the appropriate tables.
+
 #### Running the server
 
-Once all the gems are installed run ```bundle exec rackup``` to start the server on port 9292.
+Once all the gems are installed and the database is running, run ```bundle exec rackup``` to start the server on port 9292.
 
 #### Testing the server
 
