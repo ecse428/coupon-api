@@ -31,7 +31,7 @@ end
 before do
   content_type :json
 
-  @conn = PG.connect(dbname: 'coupon')
+  @conn = PG.connect(:dbname => 'coupon')
   @data = JSON.parse(request.body.read) rescue {}
 end
 
