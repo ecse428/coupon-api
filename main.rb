@@ -2,6 +2,7 @@ require 'sinatra'
 require 'json'
 require 'pg'
 require 'bcrypt'
+require 'erb'
 
 SECRET = 'S3KR3T-K3Y'
 
@@ -36,7 +37,9 @@ before do
 end
 
 get '/' do
-  { :status => 'OK' }.to_json
+  @title = 'Coupon Management System'
+  erb :index
+  #{ :status => 'OK' }.to_json
 end
 
 post '/login' do
