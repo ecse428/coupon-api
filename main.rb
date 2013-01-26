@@ -2,9 +2,14 @@ require 'sinatra'
 require 'json'
 require 'pg'
 require 'bcrypt'
-require 'erb'
 
 SECRET = 'S3KR3T-K3Y'
+
+set :public_folder, '../coupon-client'
+
+get '/' do
+  redirect '/index.html'
+end
 
 def authenticate?
   if request.cookies['key'].nil? || request.cookies['user_key'].nil?
@@ -36,13 +41,11 @@ before do
   @data = JSON.parse(request.body.read) rescue {}
 end
 
-get '/' do
-  @title = 'Coupon Management System'
-  erb :index
-  #{ :status => 'OK' }.to_json
+get '/api' do
+  { :status => 'OK' }.to_json
 end
 
-post '/login' do
+post '/api/login' do
   if @data['username'].nil? && @data['email'].nil?
     status 400
     return { :error => 'Email or Username Required' }.to_json
@@ -77,7 +80,7 @@ post '/login' do
     :key => key }.to_json
 end
 
-post '/users' do
+post '/api/users' do
   if @data['username'].nil? || @data['email'].nil? || @data['password'].nil?
     status 400
     return { :error => 'Incomplete POST Data' }.to_json
@@ -104,10 +107,10 @@ post '/users' do
               [@data['username'], @data['email'], hash])
 
   status 201
-  return { :status => 'CREATED' }.to_json
+  { :status => 'CREATED' }.to_json
 end
 
-get '/users/:id' do |id|
+get '/api/users/:id' do |id|
   return if authenticate? == false
 
   res = @conn.exec('SELECT id, username, email
@@ -123,7 +126,7 @@ get '/users/:id' do |id|
 end
 
 
-get '/coupons' do
+get '/api/coupons' do
   return if authenticate? == false
 
   res = @conn.exec('SELECT id, name, description, logo_url
@@ -137,7 +140,7 @@ get '/coupons' do
   coupons.to_json
 end
 
-get '/coupons/:id' do |id|
+get '/api/coupons/:id' do |id|
   return if authenticate? == false
 
   res = @conn.exec('SELECT id, name, description, logo_url

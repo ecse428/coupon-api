@@ -8,7 +8,35 @@ First be sure to have ruby installed, I have built this using 1.9.3 but any vers
 
 #### Git
 
-As this is a git based project, git must be installed to grab the source code. Once it is installed clone the project with ```git clone https://github.com/ecse428/coupon-api.git```
+As this is a git based project, git must be installed to grab the source code. Once it is installed clone the project with:
+
+```
+$ git clone https://github.com/ecse428/coupon-api.git
+```
+
+The application also requires the client code to be in a sibling directory. So after cloning the coupon-api run:
+
+```
+$ cd ..
+$ git clone https://github.com/ecse428/coupon-client.git
+```
+
+After both repos have been cloned you should have a directory as follows:
+
+```
+├── coupon-api
+│   ├── Gemfile
+│   ├── Gemfile.lock
+│   ├── Guardfile
+│   ├── README.md
+│   ├── config.ru
+│   ├── main.rb
+│   └── tables.sql
+└── coupon-client
+    ├── index.html
+    └── vendor
+        └── jquery.js
+```
 
 #### Version Manager
 
@@ -41,16 +69,26 @@ Once all the gems are installed and the database is running, run ```bundle exec 
 
 #### Testing the server
 
-To test the server run ```curl -X GET http://localhost:9292/``` and it should return ```{"status": "OK"}```
+To test the server run ```curl -X GET http://localhost:9292/api``` and it should return ```{"status": "OK"}```
+
+## Client
+
+The client code is kept in the following Github repo: [coupon-client](https://github.com/ecse428/coupon-client). All the HTML, CSS and JS for the application is kept in that seperate repo. The API, for simplicity reasons, will actually serve the static assets, this is why both git repos are kept as directory siblings.
 
 ## Authentication
 
-To use a route which requires authentication, basically every route other than '/login' and '/', the request must include a 'user_key' and 'key' cookie.
-
-To obtain these cookies the user must first call '/login' as follows:
+Firs things first, make sure your database contains a user. You can create a user with the following curl command:
 
 ```
-curl -X POST http://localhost:9292 -d '{"username": "INSER USERNAME HERE", "password": "INSERT PASSWORD HERE"}'
+curl -X POST http://localhost:9292/api/users -d '{"username": "INSERT USERNAME HERE", "password": "INSERT PASSWORD HERE", "email": "INSERT EMAIL HERE"}'
+```
+
+To use a route which requires authentication, basically every route other than '/login' and '/', the request must include a 'user_key' and 'key' cookie.
+
+To obtain the appropriate login cookies the user must first call '/login' as follows:
+
+```
+curl -X POST http://localhost:9292/api/login -d '{"username": "INSER USERNAME HERE", "password": "INSERT PASSWORD HERE"}'
 ```
 
 Which will return the following JSON:
@@ -67,14 +105,14 @@ Which will return the following JSON:
 Then a request requiring authentication can be made, for example:
 
 ```
-curl -X GET http://localhost:9292/coupons -b "user_key=1:alex;key=$2a$10hWo38YBa6g4Dya6F2iNbcu638BXjcL.kyq"
+curl -X GET http://localhost:9292/api/coupons -b "user_key=1:alex;key=$2a$10hWo38YBa6g4Dya6F2iNbcu638BXjcL.kyq"
 ```
 
 ## Routes
 
 ### COUPONS
 
-######GET /coupons
+###### GET /api/coupons
 
 Returns a list of all coupons
 
@@ -89,7 +127,7 @@ Returns a list of all coupons
 ]
 ```
 
-######GET /coupons/:id
+###### GET /api/coupons/:id
 
 Returns a single coupon with id == id or a 404
 
@@ -104,7 +142,7 @@ Returns a single coupon with id == id or a 404
 
 ### USERS
 
-######GET /users/:id
+###### GET /api/users/:id
 
 
 Returns the basic info about a user with id == id or a 404
