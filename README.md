@@ -2,7 +2,7 @@
 
 The coupon API's documentation and spec will be listed here
 
-## Instalation
+## Installation
 
 First be sure to have ruby installed, I have built this using 1.9.3 but any version greater than 1.8 should work.
 
@@ -73,7 +73,7 @@ To test the server run ```curl -X GET http://localhost:9292/api``` and it should
 
 ## Client
 
-The client code is kept in the following Github repo: [coupon-client](https://github.com/ecse428/coupon-client). All the HTML, CSS and JS for the application is kept in that seperate repo. The API, for simplicity reasons, will actually serve the static assets, this is why both git repos are kept as directory siblings.
+The client code is kept in the following Github repo: [coupon-client](https://github.com/ecse428/coupon-client). All the HTML, CSS and JS for the application is kept in that separate repo. The API, for simplicity reasons, will actually serve the static assets, this is why both git repos are kept as directory siblings.
 
 ## Authentication
 
