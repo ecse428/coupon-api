@@ -141,7 +141,7 @@ post '/api/coupons' do
   res = @conn.exec('SELECT id
                     FROM coupons
                     WHERE description = $1
-                    OR logo_url = $2', [@data['description'], @data['logo_url']])
+                    AND logo_url = $2 AND name = $3', [@data['description'], @data['logo_url'], @data['logo_url']])
 
   if res.num_tuples != 0
     status 400
