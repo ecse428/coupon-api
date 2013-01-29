@@ -125,6 +125,35 @@ get '/api/users/:id' do |id|
   res[0].to_json
 end
 
+post '/api/coupons' do 
+  return if authenticate? == false
+  
+    if @data['name'].nil? || @data['description'].nil? || @data['logo_url'].nil?
+    status 400
+    return { :error => 'Incomplete POST Data' }.to_json
+  end
+
+  if @data['description'].length > 1000
+    status 400
+    return { :error => 'Description Length > 1000' }.to_json
+  end
+
+  res = @conn.exec('SELECT id
+                    FROM coupons
+                    WHERE description = $1
+                    OR logo_url = $2', [@data['description'], @data['logo_url']])
+
+  if res.num_tuples != 0
+    status 400
+    return { :error => 'Coupon Already Exists' }.to_json
+  end
+
+  @conn.exec('INSERT INTO coupons (name, description, logo_url, owner_id, creator_id, amount)
+              VALUES ($1, $2, $3, $4, $5, $6)',
+              [@data['name'], @data['description'], @data['logo_url'], @user_id, @user_id, 1])
+  status 201
+  { :status => 'CREATED' }.to_json
+end
 
 get '/api/coupons' do
   return if authenticate? == false
