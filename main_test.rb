@@ -1,7 +1,4 @@
-#######################################################################
-#Please change the path to meet the location of your main.rb file
-######################################################################
-require 'main.rb'
+require './main.rb'
 require 'test/unit'
 require 'rack/test'
 require 'sinatra'
@@ -37,15 +34,6 @@ class MyAppTest < Test::Unit::TestCase
 	set_cookie "user_key=1:alex"
 	get  '/api/coupons'
 	assert last_response.ok?
-  end
-  
-  def test_logout
-	clear_cookies
-    set_cookie "key=$2a$10$AffqH1SQKfuD3Gn988nwGOHY33H5p2KingOHLoSLhQEIXVLOHpPgy"
-	set_cookie "user_key=1:alex"
-    get  '/api/logout'
-	assert last_response.ok?
-	assert_equal '{"id":null,"username":null,"user_key":null,"key":null}', last_response.body
   end
   
   def test_get_user
