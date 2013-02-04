@@ -183,14 +183,3 @@ get '/api/coupons/:id' do |id|
 
   res[0].to_json
 end
-
-get '/api/logout' do
-  return if authenticate? == false
-  
-	status 200
-   { :id => nil,
-    :username => nil,
-    :user_key => nil,
-    :key => nil }.to_json 
-  #redirect "/"
-end

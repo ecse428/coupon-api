@@ -1,7 +1,7 @@
 #######################################################################
 #Please change the path to meet the location of your main.rb file
 ######################################################################
-require 'C:/Sites/CouponManagement/coupon-api/main.rb'
+require 'main.rb'
 require 'test/unit'
 require 'rack/test'
 require 'sinatra'
