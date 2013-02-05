@@ -2,7 +2,9 @@ CREATE TABLE users (
     id serial PRIMARY KEY,
     username varchar(200),
     email varchar(200),
-    password varchar(60)
+    password varchar(60),
+    firstname varchar(200),
+    lastname varchar(200)
 );
 
 CREATE TABLE coupons (
