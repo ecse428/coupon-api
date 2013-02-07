@@ -102,9 +102,9 @@ post '/api/users' do
   end
 
   hash = BCrypt::Password.create(@data['password'])
-  @conn.exec('INSERT INTO users (username, email, password)
-              VALUES ($1, $2, $3)',
-              [@data['username'], @data['email'], hash])
+  @conn.exec('INSERT INTO users (username, email, password, firstname, lastname)
+              VALUES ($1, $2, $3, $4, $5)',
+              [@data['username'], @data['email'], hash, @data['firstname'], @data['lastname']])
 
   status 201
   { :status => 'CREATED' }.to_json
