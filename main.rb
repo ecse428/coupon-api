@@ -56,7 +56,7 @@ post '/api/login' do
     return { :error => 'Password Required' }.to_json
   end
 
-  res = @conn.exec('SELECT id, username, password
+  res = @conn.exec('SELECT id, username, password, suspended
                    FROM users
                    WHERE username = $1
                    OR email = $2', [@data['username'], @data['email']])
@@ -67,9 +67,15 @@ post '/api/login' do
   end
 
   password = BCrypt::Password.new(res[0]['password'])
+  
   if password != @data['password']
     status 403
     return { :error => 'Password Does Not Match' }.to_json
+  end
+
+  if res[0]['suspended'] = true
+	status 403
+	return { :error => 'User suspended'}.to_json
   end
 
   user_key = res[0]['id'] + ':' + res[0]['username']
@@ -100,11 +106,11 @@ post '/api/users' do
     status 400
     return { :error => 'Username/Email Already Taken' }.to_json
   end
-
+  
   hash = BCrypt::Password.create(@data['password'])
-  @conn.exec('INSERT INTO users (username, email, password, firstname, lastname)
-              VALUES ($1, $2, $3, $4, $5)',
-              [@data['username'], @data['email'], hash, @data['firstname'], @data['lastname']])
+  @conn.exec('INSERT INTO users (username, email, password, firstname, lastname, address, phonenumber,suspended,accounttype)
+              VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)',
+              [@data['username'], @data['email'], hash, @data['firstname'], @data['lastname'], @data['address'], @data['phonenumber'], false, @data['accounttype']])
 
   status 201
   { :status => 'CREATED' }.to_json
@@ -113,7 +119,7 @@ end
 get '/api/users/:id' do |id|
   return if authenticate? == false
 
-  res = @conn.exec('SELECT id, username, email
+  res = @conn.exec('SELECT id, username, email, phonenumber, firstname, lastname, address, accounttype
                    FROM users
                    WHERE id = $1', [id])
 
@@ -148,9 +154,9 @@ post '/api/coupons' do
     return { :error => 'Coupon Already Exists' }.to_json
   end
 
-  @conn.exec('INSERT INTO coupons (name, description, logo_url, owner_id, creator_id, amount)
-              VALUES ($1, $2, $3, $4, $5, $6)',
-              [@data['name'], @data['description'], @data['logo_url'], @user_id, @user_id, 1])
+  @conn.exec('INSERT INTO coupons (name, description, logo_url, owner_id, creator_id, amount, price, coupontype, expirydate)
+              VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)',
+              [@data['name'], @data['description'], @data['logo_url'], @user_id, @user_id, 1, @data['price'], @data['coupontype'], @data['expirydate']])
   status 201
   { :status => 'CREATED' }.to_json
 end
@@ -158,7 +164,7 @@ end
 get '/api/coupons' do
   return if authenticate? == false
 
-  res = @conn.exec('SELECT id, name, description, logo_url
+  res = @conn.exec('SELECT id, name, description, logo_url, owner_id, amount, price, coupontype, expirydate
                    FROM coupons')
 
   coupons = []
@@ -172,7 +178,7 @@ end
 get '/api/coupons/:id' do |id|
   return if authenticate? == false
 
-  res = @conn.exec('SELECT id, name, description, logo_url
+  res = @conn.exec('SELECT id, name, description, logo_url, owner_id, amount, price, coupontype, expirydate
                    FROM coupons
                    WHERE id = $1', [id])
 
