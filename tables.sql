@@ -20,7 +20,7 @@ CREATE TABLE coupons (
 	owner_id serial,
 	creator_id serial,
 	amount integer,
-	price double,
+	price float,
 	expirydate date,
 	FOREIGN KEY (owner_id) REFERENCES users(id),
 	FOREIGN KEY (creator_id) REFERENCES users(id)
