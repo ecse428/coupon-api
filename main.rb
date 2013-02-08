@@ -73,7 +73,7 @@ post '/api/login' do
     return { :error => 'Password Does Not Match' }.to_json
   end
 
-  if res[0]['suspended'] = true
+  if res[0]['suspended'] == true
 	status 403
 	return { :error => 'User suspended'}.to_json
   end
@@ -108,7 +108,7 @@ post '/api/users' do
   end
   
   hash = BCrypt::Password.create(@data['password'])
-  @conn.exec('INSERT INTO users (username, email, password, firstname, lastname, address, phonenumber,suspended,accounttype)
+  @conn.exec('INSERT INTO users (username, email, password, firstname, lastname, address, phonenumber, suspended, accounttype)
               VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)',
               [@data['username'], @data['email'], hash, @data['firstname'], @data['lastname'], @data['address'], @data['phonenumber'], false, @data['accounttype']])
 
