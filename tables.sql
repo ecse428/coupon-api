@@ -8,7 +8,10 @@ CREATE TABLE users (
 	address varchar(200),
 	phonenumber varchar(200),
 	suspended boolean,
-	accounttype varchar(200)
+	accounttype varchar(200),
+	paypalaccountname varchar(200),
+	creditcardnumber integer,
+	creditcardexpirydate date	
 );
 
 CREATE TABLE coupons (
@@ -22,6 +25,7 @@ CREATE TABLE coupons (
 	amount integer,
 	price float,
 	expirydate date,
+	useramountlimit integer,
 	FOREIGN KEY (owner_id) REFERENCES users(id),
 	FOREIGN KEY (creator_id) REFERENCES users(id)
 );

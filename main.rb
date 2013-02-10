@@ -55,7 +55,19 @@ post '/api/login' do
     status 400
     return { :error => 'Password Required' }.to_json
   end
-
+  
+  res = @conn.exec('SELECT id
+                   FROM users
+                   WHERE (username = $1
+				   AND suspended = $2) OR
+				  (email = $3
+				   AND suspended = $2)',[@data['username'], true, @data['email']])
+				   
+ if res.num_tuples != 0
+	status 403
+	return { :error => 'User suspended'}.to_json
+  end
+				   
   res = @conn.exec('SELECT id, username, password, suspended
                    FROM users
                    WHERE username = $1
@@ -73,11 +85,7 @@ post '/api/login' do
     return { :error => 'Password Does Not Match' }.to_json
   end
 
-  if res[0]['suspended'] == true
-	status 403
-	return { :error => 'User suspended'}.to_json
-  end
-
+  
   user_key = res[0]['id'] + ':' + res[0]['username']
   key = BCrypt::Password.create(user_key + SECRET)
   { :id => res[0]['id'],
@@ -108,9 +116,9 @@ post '/api/users' do
   end
   
   hash = BCrypt::Password.create(@data['password'])
-  @conn.exec('INSERT INTO users (username, email, password, firstname, lastname, address, phonenumber, suspended, accounttype)
-              VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)',
-              [@data['username'], @data['email'], hash, @data['firstname'], @data['lastname'], @data['address'], @data['phonenumber'], false, @data['accounttype']])
+  @conn.exec('INSERT INTO users (username, email, password, firstname, lastname, address, phonenumber, suspended, accounttype, paypalaccountname, creditcardnumber, creditcardexpirydate)
+              VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)',
+              [@data['username'], @data['email'], hash, @data['firstname'], @data['lastname'], @data['address'], @data['phonenumber'], false, @data['accounttype'], @data['paypalaccountname'], @data['creditcardnumber'], @data['creditcardexpirydate']])
 
   status 201
   { :status => 'CREATED' }.to_json
@@ -119,7 +127,7 @@ end
 get '/api/users/:id' do |id|
   return if authenticate? == false
 
-  res = @conn.exec('SELECT id, username, email, phonenumber, firstname, lastname, address, accounttype
+  res = @conn.exec('SELECT id, username, email, phonenumber, firstname, lastname, address, accounttype, paypalaccountname, creditcardnumber, creditcardexpirydate
                    FROM users
                    WHERE id = $1', [id])
 
@@ -154,9 +162,9 @@ post '/api/coupons' do
     return { :error => 'Coupon Already Exists' }.to_json
   end
 
-  @conn.exec('INSERT INTO coupons (name, description, logo_url, owner_id, creator_id, amount, price, coupontype, expirydate)
-              VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)',
-              [@data['name'], @data['description'], @data['logo_url'], @user_id, @user_id, 1, @data['price'], @data['coupontype'], @data['expirydate']])
+  @conn.exec('INSERT INTO coupons (name, description, logo_url, owner_id, creator_id, amount, price, coupontype, expirydate, useramountlimit)
+              VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)',
+              [@data['name'], @data['description'], @data['logo_url'], @user_id, @user_id, 1, @data['price'], @data['coupontype'], @data['expirydate'], @data['useramountlimit']])
   status 201
   { :status => 'CREATED' }.to_json
 end
