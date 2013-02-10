@@ -147,7 +147,7 @@ post '/api/coupons' do
   res = @conn.exec('SELECT id
                     FROM coupons
                     WHERE description = $1
-                    AND logo_url = $2 AND name = $3', [@data['description'], @data['logo_url'], @data['logo_url']])
+                    AND logo_url = $2 AND name = $3', [@data['description'], @data['logo_url'], @data['name']])
 
   if res.num_tuples != 0
     status 400
@@ -163,7 +163,7 @@ end
 
 get '/api/coupons' do
   return if authenticate? == false
-
+  
   res = @conn.exec('SELECT id, name, description, logo_url, owner_id, amount, price, coupontype, expirydate
                    FROM coupons')
 
