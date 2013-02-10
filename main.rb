@@ -146,7 +146,22 @@ post '/api/coupons' do
     status 400
     return { :error => 'Incomplete POST Data' }.to_json
   end
-
+	
+	if @data['name'].length < 3
+    status 400
+    return { :error => 'Coupon name too short < 3!' }.to_json
+  end
+  
+  if @data['logo_url'].length < 3
+    status 400
+    return { :error => 'Logo url too short < 3!' }.to_json
+  end
+  
+   if @data['description'].length < 0
+    status 400
+    return { :error => 'Description must be included!' }.to_json
+  end
+  
   if @data['description'].length >= 1000
     status 400
     return { :error => 'Description Length > 1000' }.to_json
