@@ -177,9 +177,9 @@ post '/api/coupons' do
     return { :error => 'Coupon Already Exists' }.to_json
   end
 
-  @conn.exec('INSERT INTO coupons (name, description, logo_url, owner_id, creator_id, amount, price, coupontype, expirydate)
+  @conn.exec('INSERT INTO coupons (name, description, logo_url, owner_id, creator_id, amount, price, coupontype, expirydate, useramountlimit)
               VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)',
-              [@data['name'], @data['description'], @data['logo_url'], @user_id, @user_id, 1, @data['price'], @data['coupontype'], @data['expirydate']])
+              [@data['name'], @data['description'], @data['logo_url'], @user_id, @user_id, 1, @data['price'], @data['coupontype'], @data['expirydate'], @data['useramountlimit']])
   status 201
   { :status => 'CREATED' }.to_json
 end
@@ -187,7 +187,7 @@ end
 get '/api/coupons' do
   return if authenticate? == false
   
-  res = @conn.exec('SELECT id, name, description, logo_url, owner_id, amount, price, coupontype, expirydate
+  res = @conn.exec('SELECT id, name, description, logo_url, owner_id, amount, price, coupontype, expirydate, useramountlimit
                    FROM coupons')
 
   coupons = []
@@ -201,7 +201,7 @@ end
 get '/api/coupons/:id' do |id|
   return if authenticate? == false
 
-  res = @conn.exec('SELECT id, name, description, logo_url, owner_id, amount, price, coupontype, expirydate
+  res = @conn.exec('SELECT id, name, description, logo_url, owner_id, amount, price, coupontype, expirydate, useramountlimit
                    FROM coupons
                    WHERE id = $1', [id])
 

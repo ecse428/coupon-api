@@ -10,7 +10,7 @@ CREATE TABLE users (
 	suspended boolean,
 	accounttype varchar(200),
 	paypalaccountname varchar(200),
-	creditcardnumber integer,
+	creditcardnumber varchar(200),
 	creditcardexpirydate date	
 );
 
