@@ -177,9 +177,9 @@ post '/api/coupons' do
     return { :error => 'Coupon Already Exists' }.to_json
   end
 
-  @conn.exec('INSERT INTO coupons (name, description, logo_url, owner_id, creator_id, amount, price, coupontype, expirydate, useramountlimit)
+  @conn.exec('INSERT INTO coupons (name, description, logo_url, owner_id, creator_id, amount, price, coupontype, expirydate)
               VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)',
-              [@data['name'], @data['description'], @data['logo_url'], @user_id, @user_id, 1, @data['price'], @data['coupontype'], @data['expirydate'], @data['useramountlimit']])
+              [@data['name'], @data['description'], @data['logo_url'], @user_id, @user_id, 1, @data['price'], @data['coupontype'], @data['expirydate']])
   status 201
   { :status => 'CREATED' }.to_json
 end
