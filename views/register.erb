@@ -1,4 +1,4 @@
-<form id="register">
+<form id="register" method="post" action="">
     <div><label for="acctype">I'd like to register as: </label>
 	  <input type="radio" name="acctype" value="consumer" class="accounttype" checked> Consumer
 	  <input type="radio" name="acctype" value="company" class="accounttype"> Company
@@ -8,15 +8,15 @@
       <input placeholder="Firstname" type="text" class="firstname"><input placeholder="Lastname" type="text" class="lastname">
     </div> 
 	
-	<div><label for="uname">Username: <em>*</em></label>
+	<div><label for="uname"><em>*</em>Username: </label>
 	  <input placeholder="Username" name="username" type="text" class="username">
 	</div>	
 	
-	<div><label for="pword">Password: <em>*</em></label>
+	<div><label for="pword"><em>*</em>Password: </label>
 	  <input placeholder="Password" name="password" type="password" class="password">
 	</div>	
 	
-	<div><label for="email">Email: <em>*</em></label>
+	<div><label for="email"><em>*</em>Email: </label>
 	  <input placeholder="abc@your.domain" name="email" type="text" class="email">
 	</div>
 	
@@ -85,7 +85,6 @@
 	
 	<div><p><em>*</em> - Required</p></div>
 	<div class="submit">
-	  <input type="submit" value="Register">
-	  <input type="reset" value="Cancel">
+	  <button id="submitRegistration" type="button">Register</button>
 	</div>
     </form>
