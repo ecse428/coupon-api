@@ -8,7 +8,18 @@ SECRET = 'S3KR3T-K3Y'
 set :public_folder, '../coupon-client'
 
 get '/' do
-  redirect '/index.html'
+  content_type 'text/html'
+  erb:index
+end
+
+get '/register' do
+  content_type 'text/html'
+  erb:register
+end
+
+get '/profile' do
+  content_type 'text/html'
+  erb:profile
 end
 
 def authenticate?
@@ -211,4 +222,13 @@ get '/api/coupons/:id' do |id|
   end
 
   res[0].to_json
+end
+
+get '/api/register' do
+	content_type 'application/json'
+	status 200
+	return {
+		:status => 200,
+		:tmpl => 'form'
+	}.to_json
 end
