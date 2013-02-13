@@ -229,14 +229,47 @@ get '/api/coupons/:id' do |id|
   res[0].to_json
 end
 
-post '/api/form/register' do
-	content_type 'application/json'
+post '/api/ui/register' do
+	#return if authenticate? == true
 	
-	form = erb :register, :layout => :nulllayout
+	content_type 'application/json'
 	
 	status 200
 	return {
 		:status => 'OK',
-		:tmpl => form
+		:tmpl => {
+			:nav => (erb :register_nav, :layout => :nulllayout),
+			:content => (erb :register_content, :layout => :nulllayout)
+		}
+	}.to_json
+end
+
+post '/api/ui/index' do
+	#return if authenticate? == true
+	
+	content_type 'application/json'
+	
+	status 200
+	return {
+		:status => 'OK',
+		:tmpl => {
+			:nav => (erb :index_nav, :layout => :nulllayout),
+			:content => (erb :index_content, :layout => :nulllayout)
+		}
+	}.to_json
+end
+
+post '/api/ui/profile' do
+	#return if authenticate? == true
+	
+	content_type 'application/json'
+	
+	status 200
+	return {
+		:status => 'OK',
+		:tmpl => {
+			:nav => (erb :profile_nav, :layout => :nulllayout),
+			:content => (erb :profile_content, :layout => :nulllayout)
+		}
 	}.to_json
 end

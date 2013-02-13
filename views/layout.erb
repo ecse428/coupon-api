@@ -18,7 +18,7 @@
     <div class="headerContainer">
 		<div class="header">
 			<div class="subsection brand">
-				<h1 id="logo">Coupon Management <sup>beta</sup></h1>
+				<h1 id="logo"><a href="/">Coupon Management <sup>beta</sup></a></h1>
 			</div>
 			<div class="subsection authentication">
 				<form id="login">
@@ -31,7 +31,12 @@
 		</div>	
 	</div>
     <div class="contentContainer">
-		<%= yield %>
+		<div id="navContainer">
+			<div class="contentHolder"></div>
+		</div>
+		<div id="contentStack">
+			<div class="contentHolder"></div>
+		</div>
 	</div>
 
     <div class="footerContainer">
