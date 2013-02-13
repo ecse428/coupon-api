@@ -128,26 +128,14 @@ post '/api/users' do
   end
   
   hash = BCrypt::Password.create(@data['password'])
-  
- # qdata['username'] = @data.any? { |item| item.has_key?("username") } ? @data['username'] : ''
- # qdata['username'] = @data.any? { |item| item.has_key?("username") } ? @data['username'] : ''
- # qdata['username'] = @data.any? { |item| item.has_key?("username") } ? @data['username'] : ''
- # qdata['username'] = @data.any? { |item| item.has_key?("username") } ? @data['username'] : ''
- # qdata['username'] = @data.any? { |item| item.has_key?("username") } ? @data['username'] : ''
- # qdata['username'] = @data.any? { |item| item.has_key?("username") } ? @data['username'] : ''
- # qdata['username'] = @data.any? { |item| item.has_key?("username") } ? @data['username'] : ''
- # qdata['username'] = @data.any? { |item| item.has_key?("username") } ? @data['username'] : ''
- # qdata['username'] = @data.any? { |item| item.has_key?("username") } ? @data['username'] : ''
- # qdata['username'] = @data.any? { |item| item.has_key?("username") } ? @data['username'] : ''
- # qdata['username'] = @data.any? { |item| item.has_key?("username") } ? @data['username'] : ''
-  
-  #puts qdata['username']
 
+  @conn.exec('INSERT INTO users (username, email, password, accounttype) VALUES ($1, $2, $3, $4)',
+              [@data['username'], @data['email'], hash, @data['accounttype']])
 
   
-  @conn.exec('INSERT INTO users (username, email, password, firstname, lastname, address, phonenumber, suspended, accounttype, paypalaccountname, creditcardnumber, creditcardexpirydate)
-              VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)',
-              [@data['username'], @data['email'], hash, @data['firstname'], @data['lastname'], @data['address'], @data['phonenumber'], false, @data['accounttype'], @data['paypalaccountname'], @data['creditcardnumber'], @data['creditcardexpirydate']])
+#  @conn.exec('INSERT INTO users (username, email, password, firstname, lastname, address, phonenumber, suspended, accounttype, paypalaccountname, creditcardnumber, creditcardexpirydate)
+#              VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)',
+#              [@data['username'], @data['email'], hash, @data['firstname'], @data['lastname'], @data['address'], @data['phonenumber'], false, @data['accounttype'], @data['paypalaccountname'], @data['creditcardnumber'], @data['creditcardexpirydate']])
 
   status 201
   { :status => 'CREATED' }.to_json
@@ -155,9 +143,8 @@ end
 
 get '/api/users/:id' do |id|
   return if authenticate? == false
-
-  res = @conn.exec('SELECT id, username, email, phonenumber, firstname, lastname, address, accounttype, paypalaccountname, creditcardnumber, creditcardexpirydate
-                   FROM users
+# * => username, email, password, firstname, lastname, address, phonenumber, suspended, accounttype, paypalaccountname, creditcardnumber, creditcardexpirydate
+  res = @conn.exec('SELECT * FROM users
                    WHERE id = $1', [id])
 
   if res.num_tuples == 0
