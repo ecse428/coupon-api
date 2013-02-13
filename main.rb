@@ -273,3 +273,18 @@ post '/api/ui/profile' do
 		}
 	}.to_json
 end
+
+post '/api/ui/createcoupon' do
+	#return if authenticate? == true
+	
+	content_type 'application/json'
+	
+	status 200
+	return {
+		:status => 'OK',
+		:tmpl => {
+			:nav => (erb :createcoupon_nav, :layout => :nulllayout),
+			:content => (erb :createcoupon_content, :layout => :nulllayout)
+		}
+	}.to_json
+end
