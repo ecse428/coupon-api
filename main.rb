@@ -128,6 +128,23 @@ post '/api/users' do
   end
   
   hash = BCrypt::Password.create(@data['password'])
+  
+ # qdata['username'] = @data.any? { |item| item.has_key?("username") } ? @data['username'] : ''
+ # qdata['username'] = @data.any? { |item| item.has_key?("username") } ? @data['username'] : ''
+ # qdata['username'] = @data.any? { |item| item.has_key?("username") } ? @data['username'] : ''
+ # qdata['username'] = @data.any? { |item| item.has_key?("username") } ? @data['username'] : ''
+ # qdata['username'] = @data.any? { |item| item.has_key?("username") } ? @data['username'] : ''
+ # qdata['username'] = @data.any? { |item| item.has_key?("username") } ? @data['username'] : ''
+ # qdata['username'] = @data.any? { |item| item.has_key?("username") } ? @data['username'] : ''
+ # qdata['username'] = @data.any? { |item| item.has_key?("username") } ? @data['username'] : ''
+ # qdata['username'] = @data.any? { |item| item.has_key?("username") } ? @data['username'] : ''
+ # qdata['username'] = @data.any? { |item| item.has_key?("username") } ? @data['username'] : ''
+ # qdata['username'] = @data.any? { |item| item.has_key?("username") } ? @data['username'] : ''
+  
+  #puts qdata['username']
+
+
+  
   @conn.exec('INSERT INTO users (username, email, password, firstname, lastname, address, phonenumber, suspended, accounttype, paypalaccountname, creditcardnumber, creditcardexpirydate)
               VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)',
               [@data['username'], @data['email'], hash, @data['firstname'], @data['lastname'], @data['address'], @data['phonenumber'], false, @data['accounttype'], @data['paypalaccountname'], @data['creditcardnumber'], @data['creditcardexpirydate']])
