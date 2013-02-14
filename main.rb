@@ -257,7 +257,7 @@ post '/api/ui/index' do
 	return {
 		:status => 'OK',
 		:tmpl => {
-			:nav => (erb :index_nav, :layout => :nulllayout),
+			:nav => @user_id ? (erb :profile_nav, :layout => :nulllayout) : (erb :index_nav, :layout => :nulllayout),
 			:content => (erb :index_content, :layout => :nulllayout)
 		}
 	}.to_json
@@ -274,6 +274,21 @@ post '/api/ui/profile' do
 		:tmpl => {
 			:nav => (erb :profile_nav, :layout => :nulllayout),
 			:content => (erb :profile_content, :layout => :nulllayout)
+		}
+	}.to_json
+end
+
+post '/api/ui/editprofile' do
+	#return if authenticate? == true
+	
+	content_type 'application/json'
+	
+	status 200
+	return {
+		:status => 'OK',
+		:tmpl => {
+			:nav => (erb :profile_nav, :layout => :nulllayout),
+			:content => (erb :editprofile_content, :layout => :nulllayout)
 		}
 	}.to_json
 end
