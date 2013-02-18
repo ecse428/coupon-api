@@ -11,6 +11,7 @@ set :views, '../coupon-client/views'
 
 get '/' do
   content_type 'text/html'
+  
   File.read(File.join('..', 'coupon-client', 'index.html'))
 end
 
@@ -291,6 +292,16 @@ get '/api/ui/createcoupon' do
     :tmpl => {
       :nav => (erb :createcoupon_nav, :layout => :nulllayout),
       :content => (erb :createcoupon_content, :layout => :nulllayout)
+    }
+  }.to_json
+end
+
+get '/api/ui/settings' do
+  return {
+    :status => 'OK',
+    :tmpl => {
+      :nav => (erb :settings_nav, :layout => :nulllayout),
+      :content => (erb :settings_content, :layout => :nulllayout)
     }
   }.to_json
 end
