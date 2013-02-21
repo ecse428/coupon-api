@@ -211,7 +211,7 @@ get '/api/coupons' do
   return if authenticate?(true) == false
 
   res = @conn.exec('SELECT id, name, description, logo_url, owner_id, amount, price, coupontype, expirydate, useramountlimit
-                   FROM coupons')
+                   FROM coupons WHERE owner_id = ' + @user_id)
 
   coupons = []
   res.each { |row|
