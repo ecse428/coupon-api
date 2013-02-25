@@ -158,6 +158,16 @@ get '/api/users/:id' do |id|
   res[0].to_json
 end
 
+
+put '/api/users/:id' do |id|
+  return if authenticate?(true) == false
+  #{ :status => 'Connected' }.to_json
+  @conn.exec('UPDATE users SET email = $1
+  			  WHERE id = $2', [@data['email'], id])
+  status 201
+  { :status => 'MODIFIED' }.to_json  
+end
+
 post '/api/coupons' do
   return if authenticate?(true) == false
 
