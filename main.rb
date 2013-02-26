@@ -239,7 +239,7 @@ get '/api/coupons' do
     coupons.push(row)
   }
 
-  coupons.to_json
+  {:status => 'ok', :data => coupons}.to_json
 end
 
 get '/api/coupons/:id' do |id|
