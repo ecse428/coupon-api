@@ -242,6 +242,19 @@ get '/api/coupons' do
   {:status => 'ok', :data => coupons}.to_json
 end
 
+get '/api/coupons/all' do
+
+  res = @conn.exec('SELECT id, name, description, logo_url, owner_id, amount, price, coupontype, expirydate, useramountlimit
+                   FROM coupons')
+
+  coupons = []
+  res.each { |row|
+    coupons.push(row)
+  }
+
+  {:status => 'ok', :data => coupons}.to_json
+end
+
 get '/api/coupons/:id' do |id|
   return if authenticate?(true) == false
 
