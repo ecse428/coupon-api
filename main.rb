@@ -257,6 +257,34 @@ get '/api/coupons/:id' do |id|
   res[0].to_json
 end
 
+post '/api/user_search' do
+  return if authenticate?(true) == false
+  
+  res = @conn.exec('SELECT * FROM users
+                    WHERE username = $1', [@data['username']])
+                    
+  if res.num_tuples == 0
+    status 202
+    return { :error => 'User Not Found' }.to_json
+  end
+  
+  res[0].to_json
+end
+
+post '/api/coupon_search' do
+  return if authenticate?(true) == false
+  
+  res = @conn.exec('SELECT * FROM coupons
+                    WHERE name = $1', [@data['couponname']])
+                    
+  if res.num_tuples == 0
+    status 202
+    return { :error => 'Coupon Not Found' }.to_json
+  end
+  
+  res[0].to_json
+end
+
 get '/api/ui/register' do
   return {
     :status => 'OK',
@@ -323,6 +351,36 @@ get '/api/ui/settings' do
     :tmpl => {
       :nav => (erb :settings_nav, :layout => :nulllayout),
       :content => (erb :settings_content, :layout => :nulllayout)
+    }
+  }.to_json
+end
+
+get '/api/ui/search' do
+  return {
+    :status => 'OK',
+    :tmpl => {
+      :nav => (erb :search_nav, :layout => :nulllayout),
+      :content => (erb :search_content, :layout => :nulllayout)
+    }
+  }.to_json
+end
+
+get '/api/ui/user_result' do
+  return {
+    :status => 'OK',
+    :tmpl => {
+      :nav => (erb :search_nav, :layout => :nulllayout),
+      :content => (erb :user_result, :layout => :nulllayout)
+    }
+  }.to_json
+end
+
+get '/api/ui/coupon_result' do
+  return {
+    :status => 'OK',
+    :tmpl => {
+      :nav => (erb :search_nav, :layout => :nulllayout),
+      :content => (erb :coupon_result, :layout => :nulllayout)
     }
   }.to_json
 end
