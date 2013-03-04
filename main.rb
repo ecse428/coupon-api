@@ -369,7 +369,7 @@ get '/api/ui/user_result' do
   return {
     :status => 'OK',
     :tmpl => {
-      :nav => (erb :search_nav, :layout => :nulllayout),
+      :nav => (erb :search_nav_r, :layout => :nulllayout),
       :content => (erb :user_result, :layout => :nulllayout)
     }
   }.to_json
@@ -379,7 +379,7 @@ get '/api/ui/coupon_result' do
   return {
     :status => 'OK',
     :tmpl => {
-      :nav => (erb :search_nav, :layout => :nulllayout),
+      :nav => (erb :search_nav_r, :layout => :nulllayout),
       :content => (erb :coupon_result, :layout => :nulllayout)
     }
   }.to_json
