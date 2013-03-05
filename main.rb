@@ -397,3 +397,13 @@ get '/api/ui/coupon_result' do
     }
   }.to_json
 end
+
+get '/api/ui/coupondetail' do
+  return {
+    :status => 'OK',
+    :tmpl => {
+      :nav => (erb :coupondetail_nav, :layout => :nulllayout),
+      :content => (erb :coupondetail_content, :layout => :nulllayout)
+    }
+  }.to_json
+end
