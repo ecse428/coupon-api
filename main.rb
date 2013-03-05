@@ -267,7 +267,7 @@ get '/api/coupons/:id' do |id|
     return { :error => 'Coupon Not Found' }.to_json
   end
 
-  res[0].to_json
+  {:status => 'ok', :data => res[0]}.to_json
 end
 
 post '/api/user_search' do
