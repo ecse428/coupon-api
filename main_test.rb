@@ -9,7 +9,7 @@ require 'bcrypt'
 set :environment, :test
 
 ##############################################################################################
-#Test assumes in the database there is a user called alex with id 1 and password 12345678.
+#Test assumes in the database there is a user called alex with id 5 and password 12345678.
 ##############################################################################################
 
 class CouponTest < MiniTest::Unit::TestCase
@@ -132,6 +132,55 @@ class CouponTest < MiniTest::Unit::TestCase
   def test_create_coupon_invalid_logo_url
     post '/api/users', {:name => "boston_pizza", :description => "12345678" , :logo_url => nil}.to_json, "CONTENT_TYPE" => "application/json"
     assert_equal '{"error":"Incomplete POST Data"}', last_response.body
+  end
+
+  def test_search_user
+    post '/api/user_search', {:username => 'alex'}.to_json, "CONTENT_TYPE" => "application/json"
+    body = JSON.parse last_response.body
+    assert_equal body['status'], 'OK'
+    assert body['data'].length > 0
+  end
+
+  def test_search_user_fuzzy
+    post '/api/user_search', {:username => 'alex'}.to_json, "CONTENT_TYPE" => "application/json"
+    body = JSON.parse last_response.body
+    assert_equal body['status'], 'OK'
+    assert body['data'].length > 0
+  end
+
+  def test_search_coupon
+    post '/api/coupon_search', {:couponname => 'abc'}.to_json, "CONTENT_TYPE" => "application/json"
+    body = JSON.parse last_response.body
+    assert_equal body['status'], 'OK'
+    assert body['data'].length > 0
+  end
+
+  def test_search_coupon_fuzzy
+    post '/api/coupon_search', {:couponname => ''}.to_json, "CONTENT_TYPE" => "application/json"
+    body = JSON.parse last_response.body
+    assert_equal body['status'], 'OK'
+    assert body['data'].length > 0
+  end
+
+  def test_ui
+    get '/api/ui/index'
+    body = JSON.parse last_response.body
+    assert_equal body['status'], 'OK'
+    assert body['tmpl']['nav'].length > 0
+    assert body['tmpl']['content'].length > 0
+  end
+
+  def test_ui_do_not_match
+    get '/api/ui/index'
+    index_body = JSON.parse last_response.body
+
+    get '/api/ui/guest'
+    guest_body = JSON.parse last_response.body
+
+    assert_equal index_body['status'], 'OK'
+    assert_equal guest_body['status'], 'OK'
+
+    assert index_body['tmpl']['content'] != guest_body['tmpl']['content']
   end
 end
 
