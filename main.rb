@@ -11,8 +11,12 @@ set :views, '../coupon-client/views'
 
 get '/' do
   content_type 'text/html'
-  
   File.read(File.join('..', 'coupon-client', 'index.html'))
+end
+
+get '/client-tests' do
+  content_type 'text/html'
+  File.read(File.join('..', 'coupon-client', 'tests.html'))
 end
 
 def authenticate?(status)
@@ -36,7 +40,7 @@ def authenticate?(status)
   end
 
   split = request.cookies['user_key'].split(":")
-  @user_id = split[0]
+  @user_id = Integer(split[0])
   @username = split[1]
 
   return true
@@ -101,7 +105,7 @@ end
 
 get '/api/login/test' do
   if authenticate?(false)
-    { :status => true,
+    { :status => 'OK',
       :user_id => @user_id,
       :username => @username }.to_json
   else
@@ -132,13 +136,13 @@ post '/api/users' do
 
   hash = BCrypt::Password.create(@data['password'])
 
-  @conn.exec('INSERT INTO users (username, email, password, accounttype) VALUES ($1, $2, $3, $4)',
-              [@data['username'], @data['email'], hash, @data['accounttype']])
-
-
-#  @conn.exec('INSERT INTO users (username, email, password, firstname, lastname, address, phonenumber, suspended, accounttype, paypalaccountname, creditcardnumber, creditcardexpirydate)
-#              VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)',
-#              [@data['username'], @data['email'], hash, @data['firstname'], @data['lastname'], @data['address'], @data['phonenumber'], false, @data['accounttype'], @data['paypalaccountname'], @data['creditcardnumber'], @data['creditcardexpirydate']])
+  @conn.exec('INSERT INTO users (username, email, password, firstname, lastname,
+                                 address, phonenumber, suspended, accounttype, paypalaccountname,
+                                 creditcardnumber, creditcardexpirydate)
+              VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)',
+              [@data['username'], @data['email'], hash, @data['firstname'], @data['lastname'],
+               @data['address'], @data['phonenumber'], false, 'user', @data['paypalaccountname'],
+               @data['creditcardnumber'], @data['creditcardexpirydate']])
 
   status 201
   { :status => 'CREATED' }.to_json
@@ -161,7 +165,7 @@ end
 
 put '/api/users/:id' do |id|
   return if authenticate?(true) == false
-  
+
   res = @conn.exec('SELECT id
                     FROM users
                     WHERE email = $1', [@data['email']])
@@ -170,13 +174,11 @@ put '/api/users/:id' do |id|
     status 400
     return { :error => 'Email Already Taken' }.to_json
   end
-  
+
   @conn.exec('UPDATE users SET email = $1
-  			  WHERE id = $2', [@data['email'], id])
+              WHERE id = $2', [@data['email'], id])
   status 201
-  { :status => 'MODIFIED' }.to_json  
-  
-  
+  { :status => 'MODIFIED' }.to_json
 end
 
 post '/api/coupons' do
@@ -232,14 +234,14 @@ get '/api/coupons' do
   return if authenticate?(true) == false
 
   res = @conn.exec('SELECT id, name, description, logo_url, owner_id, amount, price, coupontype, expirydate, useramountlimit
-                   FROM coupons WHERE owner_id = ' + @user_id)
+                    FROM coupons', [])
 
   coupons = []
   res.each { |row|
     coupons.push(row)
   }
 
-  {:status => 'ok', :data => coupons}.to_json
+  {:status => 'OK', :data => coupons}.to_json
 end
 
 get '/api/coupons/all' do
@@ -272,29 +274,29 @@ end
 
 post '/api/user_search' do
   return if authenticate?(true) == false
-  
+
   res = @conn.exec('SELECT * FROM users
                     WHERE username = $1', [@data['username']])
-                    
+
   if res.num_tuples == 0
     status 202
     return { :error => 'User Not Found' }.to_json
   end
-  
+
   res[0].to_json
 end
 
 post '/api/coupon_search' do
   return if authenticate?(true) == false
-  
+
   res = @conn.exec('SELECT * FROM coupons
                     WHERE name = $1', [@data['couponname']])
-                    
+
   if res.num_tuples == 0
     status 202
     return { :error => 'Coupon Not Found' }.to_json
   end
-  
+
   res[0].to_json
 end
 
@@ -406,4 +408,34 @@ get '/api/ui/coupondetail' do
       :content => (erb :coupondetail_content, :layout => :nulllayout)
     }
   }.to_json
+end
+
+get '/api/ui/testpage' do
+  return {
+    :status => 'OK',
+    :tmpl => {
+      :nav => (erb :testpage_nav, :layout => :nulllayout),
+      :content => (erb :testpage_content, :layout => :nulllayout)
+    }
+  }.to_json
+end
+
+# Test Bench
+
+get '/api/tests' do
+  return if authenticate?(true) == false
+
+  res = @conn.exec('SELECT accounttype
+                    FROM users
+                    WHERE id = $1', [@user_id])
+
+  if res[0]['accounttype'] != 'admin'
+      status 403
+      return { :error => 'Admin Only Page' }.to_json
+  end
+
+  results = `bundle exec ruby main_test.rb`
+
+  return {:status => 'OK', :res => results}.to_json
+
 end

@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite time='0.518332' skipped='0' failures='0' errors='0' name='CouponTest' assertions='20' tests='7'>
+  <testcase time='0.025926' name='test_create_coupon' assertions='3'>
+  </testcase>
+  <testcase time='0.078171' name='test_get_user' assertions='1'>
+  </testcase>
+  <testcase time='0.016368' name='test_registration' assertions='5'>
+  </testcase>
+  <testcase time='0.077776' name='test_get_coupons' assertions='1'>
+  </testcase>
+  <testcase time='0.078508' name='test_get_user_coupon' assertions='1'>
+  </testcase>
+  <testcase time='0.003607' name='test_simple_func' assertions='2'>
+  </testcase>
+  <testcase time='0.237976' name='test_login' assertions='7'>
+  </testcase>
+</testsuite>
