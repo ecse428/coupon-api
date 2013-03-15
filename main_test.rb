@@ -67,62 +67,69 @@ class CouponTest < MiniTest::Unit::TestCase
   # Test post requests
   ##############################################
 
-  def test_login
-    #missing password or email to login
+  def test_login_missing_email
     post '/api/login', {:data => nil}.to_json, "CONTENT_TYPE" => "application/json"
     assert_equal '{"error":"Email or Username Required"}', last_response.body
+  end
 
-    #invalid user (non registred user)
+  def test_login_not_registered
     post '/api/login', {:username => "xmlk" , :password => "12345678"}.to_json, "CONTENT_TYPE" => "application/json"
     assert_equal '{"error":"User Not Found"}', last_response.body
+  end
 
-    #username given but password missing
+  def test_login_username_without_password
     post '/api/login', {:username => "alex"}.to_json, "CONTENT_TYPE" => "application/json"
     assert_equal '{"error":"Password Required"}', last_response.body
+  end
 
-    #username but invalid password given
+  def test_login_username_invalid_password
     post '/api/login', {:username => "alex", :password => "test"}.to_json, "CONTENT_TYPE" => "application/json"
     assert_equal '{"error":"Password Does Not Match"}', last_response.body
+  end
 
-    #valid username and password given
+  def test_login_valid_data
     post '/api/login', {:username => "alex", :password => "12345678"}.to_json, "CONTENT_TYPE" => "application/json"
     refute_equal '{"error":"Password Does Not Match"}', last_response.body
     refute_equal '{"error":"Password Required"}', last_response.body
     refute_equal '{"error":"Email or Username Required"}', last_response.body
   end
 
-  def test_registration
-    #missing username
+  def test_registration_missing_username
     post '/api/users', {:username => nil, :password => "12345678" , :email => 'trail@test.com'}.to_json, "CONTENT_TYPE" => "application/json"
     assert_equal '{"error":"Incomplete POST Data"}', last_response.body
+  end
 
-    #missing password
+  def test_registration_missing_password
     post '/api/users', {:username => "charles", :password => nil , :email => 'trail@test.com'}.to_json, "CONTENT_TYPE" => "application/json"
     assert_equal '{"error":"Incomplete POST Data"}', last_response.body
+  end
 
-    #missing email
+  def test_registration_missing_email
     post '/api/users', {:username => "charles", :password => "12345678" , :email => nil}.to_json, "CONTENT_TYPE" => "application/json"
     assert_equal '{"error":"Incomplete POST Data"}', last_response.body
+  end
 
-    #Password length too small
+  def test_registration_password_too_small
     post '/api/users', {:username => "charles", :password => "12345" , :email => 'trail@test.com'}.to_json, "CONTENT_TYPE" => "application/json"
     assert_equal '{"error":"Password Length < 8"}', last_response.body
+  end
 
-    #Username already exists
+  def test_registration_username_exists
     post '/api/users', {:username => "alex", :password => "12345678" , :email => 'test@test.com'}.to_json, "CONTENT_TYPE" => "application/json"
     assert_equal '{"error":"Username/Email Already Taken"}', last_response.body
   end
 
-  def test_create_coupon
-    #invalid coupon name
+  def test_create_coupon_invalid_name
     post '/api/users', {:name => nil, :description => "12345678" , :logo_url => 'www.test.com'}.to_json, "CONTENT_TYPE" => "application/json"
     assert_equal '{"error":"Incomplete POST Data"}', last_response.body
+  end
 
-    #invalid description name
+  def test_create_coupon_invalid_desc
     post '/api/users', {:name => "boston_pizza", :description => nil , :logo_url => 'www.test.com'}.to_json, "CONTENT_TYPE" => "application/json"
     assert_equal '{"error":"Incomplete POST Data"}', last_response.body
+  end
 
-    #invalid logo_url name
+  def test_create_coupon_invalid_logo_url
     post '/api/users', {:name => "boston_pizza", :description => "12345678" , :logo_url => nil}.to_json, "CONTENT_TYPE" => "application/json"
     assert_equal '{"error":"Incomplete POST Data"}', last_response.body
   end

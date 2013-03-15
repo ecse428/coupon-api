@@ -250,9 +250,7 @@ get '/api/coupons/all' do
                    FROM coupons')
 
   coupons = []
-  res.each { |row|
-    coupons.push(row)
-  }
+  res.each { |row| coupons.push(row) }
 
   {:status => 'ok', :data => coupons}.to_json
 end
@@ -275,29 +273,35 @@ end
 post '/api/user_search' do
   return if authenticate?(true) == false
 
-  res = @conn.exec('SELECT * FROM users
-                    WHERE username = $1', [@data['username']])
+  res = @conn.exec('SELECT id, username, email, firstname, lastname, address, phonenumber, suspended, accounttype FROM users
+                    WHERE username LIKE $1', ['%' + @data['username'] + '%'])
 
   if res.num_tuples == 0
     status 202
     return { :error => 'User Not Found' }.to_json
   end
 
-  res[0].to_json
+  users = []
+  res.each { |row| users.push(row) }
+
+  {:status => 'OK', :data => users}.to_json
 end
 
 post '/api/coupon_search' do
   return if authenticate?(true) == false
 
   res = @conn.exec('SELECT * FROM coupons
-                    WHERE name = $1', [@data['couponname']])
+                    WHERE name LIKE $1', ['%' + @data['couponname'] + '%'])
 
   if res.num_tuples == 0
     status 202
     return { :error => 'Coupon Not Found' }.to_json
   end
 
-  res[0].to_json
+  coupons = []
+  res.each { |row| coupons.push(row) }
+
+  {:status => 'OK', :data => coupons}.to_json
 end
 
 get '/api/ui/register' do
