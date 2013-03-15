@@ -175,8 +175,26 @@ put '/api/users/:id' do |id|
     return { :error => 'Email Already Taken' }.to_json
   end
 
-  @conn.exec('UPDATE users SET email = $1
-              WHERE id = $2', [@data['email'], id])
+  if @data['email'] != nil and @data['email'] != ''
+    @conn.exec('UPDATE users SET email=$1
+                WHERE id = $2', [@data['email'], @data['address'], @data['phone'], @data['paypal'], id])
+  end
+
+  if @data['address'] != nil and @data['address'] != ''
+    @conn.exec('UPDATE users SET address=$1
+                WHERE id = $2', [@data['address'], id])
+  end
+
+  if @data['phone'] != nil and @data['phone'] != ''
+    @conn.exec('UPDATE users SET phonenumber=$1
+                WHERE id = $2', [@data['phone'], id])
+  end
+
+  if @data['paypal'] != nil and @data['paypal'] != ''
+    @conn.exec('UPDATE users SET paypalaccountnumber=$1
+                WHERE id = $2', [@data['paypal'], id])
+  end
+
   status 201
   { :status => 'MODIFIED' }.to_json
 end
@@ -219,9 +237,9 @@ post '/api/coupons' do
     return { :error => 'Coupon Already Exists' }.to_json
   end
 
-  @conn.exec('INSERT INTO coupons (name, description, logo_url, owner_id, creator_id, amount, price)
-              VALUES ($1, $2, $3, $4, $5, $6, $7)',
-              [@data['name'], @data['description'], @data['logo_url'], @user_id, @user_id, 1, @data['price']])
+  @conn.exec('INSERT INTO coupons (name, description, logo_url, owner_id, creator_id, amount, price, expirydate)
+              VALUES ($1, $2, $3, $4, $5, $6, $7, $8)',
+              [@data['name'], @data['description'], @data['logo_url'], @user_id, @user_id, 1, @data['price'], @data['date']])
 
 #  @conn.exec('INSERT INTO coupons (name, description, logo_url, owner_id, creator_id, amount, price, coupontype, expirydate, useramountlimit)
 #              VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)',
@@ -301,7 +319,7 @@ post '/api/coupon_search' do
   coupons = []
   res.each { |row| coupons.push(row) }
 
-  {:status => 'OK', :data => coupons}.to_json
+  {:status => 'OK'}.to_json
 end
 
 get '/api/ui/register' do
