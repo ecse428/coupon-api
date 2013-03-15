@@ -29,3 +29,12 @@ CREATE TABLE coupons (
     FOREIGN KEY (owner_id) REFERENCES users(id),
     FOREIGN KEY (creator_id) REFERENCES users(id)
 );
+
+CREATE TABLE purchased_coupons (
+	id serial PRIMARY KEY,
+	owner_id serial,
+	creator_id serial,
+	purchased_quantity integer,
+	claimed_quantity integer,
+	purchase_time date
+);
