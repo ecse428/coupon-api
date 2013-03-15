@@ -319,7 +319,7 @@ post '/api/coupon_search' do
   coupons = []
   res.each { |row| coupons.push(row) }
 
-  {:status => 'OK'}.to_json
+  {:status => 'OK', :data => coupons}.to_json
 end
 
 get '/api/ui/register' do
