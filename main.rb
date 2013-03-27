@@ -322,6 +322,31 @@ post '/api/coupon_search' do
   {:status => 'OK', :data => coupons}.to_json
 end
 
+get '/api/coupons/purchased/' do
+  res = @conn.exec('SELECT * FROM purchased_coupons
+  					WHERE owner_id = $1', [@data['user_id']])
+  
+  coupons = []
+  res.each { |row| coupons.push(row) }
+
+  {:status => 'ok', :data => coupons}.to_json
+end
+
+post '/api/coupons/buy/' do
+  return if authenticate?(true) == false
+  
+  #if coupons.quantity < purchased_quantity then error: cannot purchase at this quantity
+  
+  @conn.exec('INSERT INTO purchased_coupons (owner_id, creator_id, purchased_quantity, claimed_quantity
+  			  VALUES ($1, $2, $3, $4)',
+  			  [@data['owner_id'], @data['creator_id'], @data['purchased_quantity'], @data['claimed_quantity']])
+  			  
+  #reduce the 'amount' of the purchased coupon
+  
+  {:status => 'OK'}.to_json
+end
+  			  
+
 get '/api/ui/register' do
   return {
     :status => 'OK',
@@ -428,6 +453,16 @@ get '/api/ui/coupondetail' do
     :tmpl => {
       :nav => (erb :coupondetail_nav, :layout => :nulllayout),
       :content => (erb :coupondetail_content, :layout => :nulllayout)
+    }
+  }.to_json
+end
+
+get '/api/ui/purchasedcoupon' do
+  return {
+    :status => 'OK',
+    :tmpl => {
+      :nav => (erb :purchasedcoupon_nav, :layout => :nulllayout),
+      :content => (erb :purchasedcoupon_content, :layout => :nulllayout)
     }
   }.to_json
 end
