@@ -322,9 +322,10 @@ post '/api/coupon_search' do
   {:status => 'OK', :data => coupons}.to_json
 end
 
-get '/api/coupons/purchased/' do
-  res = @conn.exec('SELECT * FROM purchased_coupons
-  					WHERE owner_id = $1', [@data['user_id']])
+get '/api/coupons/purchased/:user_id' do |user_id|
+  res = @conn.exec('SELECT coupons.id, name, description, logo_url, coupons.owner_id, amount, price, coupontype, expirydate, useramountlimit 
+  					FROM coupons, purchased_coupons
+  					WHERE purchased_coupons.owner_id = $1 AND purchased_coupons.coupon_id = coupons.id', [user_id])
   
   coupons = []
   res.each { |row| coupons.push(row) }
@@ -332,14 +333,14 @@ get '/api/coupons/purchased/' do
   {:status => 'ok', :data => coupons}.to_json
 end
 
-post '/api/coupons/buy/' do
+post '/api/coupons/buy/:user_id/:id' do |user_id, id|
   return if authenticate?(true) == false
   
   #if coupons.quantity < purchased_quantity then error: cannot purchase at this quantity
   
-  @conn.exec('INSERT INTO purchased_coupons (owner_id, creator_id, purchased_quantity, claimed_quantity
-  			  VALUES ($1, $2, $3, $4)',
-  			  [@data['owner_id'], @data['creator_id'], @data['purchased_quantity'], @data['claimed_quantity']])
+  @conn.exec('INSERT INTO purchased_coupons (owner_id, creator_id, purchased_quantity, claimed_quantity, coupon_id)
+  			  VALUES ($1, $2, $3, $4, $5)',
+  			  [user_id, user_id, @data['purchased_quantity'], 0, id])
   			  
   #reduce the 'amount' of the purchased coupon
   

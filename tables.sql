@@ -36,5 +36,6 @@ CREATE TABLE purchased_coupons (
 	creator_id serial,
 	purchased_quantity integer,
 	claimed_quantity integer,
-	purchase_time date
+	purchase_time date,
+	FOREIGN KEY (coupon_id) REFERENCES coupons(id)
 );
