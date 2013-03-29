@@ -342,6 +342,17 @@ get '/api/coupons' do
  {:status => 'OK', :data => coupons}.to_json
 end
 
+get '/api/mycoupons' do
+ res = @conn.exec('SELECT id, name, description, logo_url, owner_id, amount, price, coupontype, expirydate, useramountlimit
+					FROM coupons
+					WHERE amount > 0 AND owner_id = $1', [@user_id])
+
+ coupons = []
+ res.each { |row| coupons.push(row) }
+
+ {:status => 'OK', :data => coupons}.to_json
+end
+
 get '/api/coupons/:id' do |id|
  return if authenticate?(true) == false
 
@@ -563,6 +574,16 @@ get '/api/ui/deletecoupon' do
 end
 
 get '/api/ui/purchasedcoupon' do
+ return {
+	:status => 'OK',
+	:tmpl => {
+	 :nav => (erb :purchasedcoupon_nav, :layout => :nulllayout),
+	 :content => (erb :purchasedcoupon_content, :layout => :nulllayout)
+	}
+ }.to_json
+end
+
+get '/api/ui/managecoupon' do
  return {
 	:status => 'OK',
 	:tmpl => {
