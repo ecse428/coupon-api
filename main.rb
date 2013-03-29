@@ -300,10 +300,20 @@ post '/api/coupon_search' do
   {:status => 'OK', :data => coupons}.to_json
 end
 
-get '/api/coupons/purchased/:user_id' do |user_id|
-  res = @conn.exec('SELECT coupons.id, name, description, logo_url, coupons.owner_id, amount, price, coupontype, expirydate, useramountlimit 
-                    FROM coupons, purchased_coupons
-                    WHERE purchased_coupons.owner_id = $1 AND purchased_coupons.coupon_id = coupons.id', [user_id])
+get '/api/users/:id/purchased' do |id|
+  return if authenticate?(true) == false
+
+  if @user_id != Integer(id)
+    status 403
+    return { :error => 'Cannot view other user\'s purchases' }.to_json
+  end
+
+  res = @conn.exec('SELECT coupons.id, coupons.name, coupons.description, coupons.logo_url, coupons.price,
+                           purchased_quantity, claimed_quantity
+                    FROM purchased_coupons
+                    JOIN coupons ON (coupons.id = purchased_coupons.coupon_id)
+                    WHERE purchased_coupons.owner_id = $1',
+                   [@user_id])
 
   coupons = []
   res.each { |row| coupons.push(row) }
