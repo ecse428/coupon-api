@@ -146,7 +146,7 @@ post '/api/users' do
 								 creditcardnumber, creditcardexpirydate)
 			 VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)',
 			 [@data['username'], @data['email'], hash, @data['firstname'], @data['lastname'],
-				@data['address'], @data['phonenumber'], false, 'user', @data['paypalaccountname'],
+				@data['address'], @data['phonenumber'], false, @data['accounttype'], @data['paypalaccountname'],
 				@data['creditcardnumber'], @data['creditcardexpirydate']])
 
  status 201
@@ -242,9 +242,9 @@ post '/api/coupons' do
 	return { :error => 'Coupon Already Exists' }.to_json
  end
 
- @conn.exec('INSERT INTO coupons (name, description, logo_url, owner_id, creator_id, amount, price, expirydate)
-			 VALUES ($1, $2, $3, $4, $5, $6, $7, $8)',
-			 [@data['name'], @data['description'], @data['logo_url'], @user_id, @user_id, @data['amount'], @data['price'], @data['date']])
+ @conn.exec('INSERT INTO coupons (name, description, logo_url, owner_id, creator_id, amount, price, expirydate, published, publishing)
+			 VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)',
+			 [@data['name'], @data['description'], @data['logo_url'], @user_id, @user_id, @data['amount'], @data['price'], @data['date'], false, false])
 
  status 201
  { :status => 'CREATED' }.to_json
@@ -332,9 +332,10 @@ delete '/api/coupons/:id' do |id|
 end
 
 get '/api/coupons' do
+ #I want (publishing = true OR owner_id = $1) AND amount > 0
  res = @conn.exec('SELECT id, name, description, logo_url, owner_id, amount, price, coupontype, expirydate, useramountlimit
 					FROM coupons
-					WHERE amount > 0', [])
+					WHERE publishing = true AND amount > 0')
 
  coupons = []
  res.each { |row| coupons.push(row) }
@@ -431,6 +432,66 @@ post '/api/coupons/:id/buy' do |id|
 
  {:status => 'OK'}.to_json
 end
+
+put '/api/coupons/publish/:id' do |id|
+  return if authenticate?(true) == false
+  
+  res = @conn.exec('SELECT published, publishing 
+                    FROM coupons 
+                    WHERE id = $1', 
+                    [id])
+  
+  if res.num_tuples == 0
+	status 404
+	return { :error => 'Coupon Not Found' }.to_json
+  end
+  
+  #if published before, cannot re-publish
+  if (res.getvalue(0,0) == true)
+    status 404
+    return { :error => 'Cannot Re-Publish Coupon' }.to_json
+  end
+  
+  #if being published right now, cannot publish
+  if (res[0][1] == true)
+    status 404
+    return { :error => 'Cannot Publish Publishing Coupon' }.to_json
+  end
+  
+  @conn.exec('UPDATE coupons
+              SET published = $1, publishing = $2
+              WHERE id = $3',
+              [true, true, id])
+              
+  {:status => 'OK'}.to_json
+end
+
+put '/api/coupons/unpublish/:id' do |id|
+  return if authenticate?(true) == false
+  
+  res = @conn.exec('SELECT published, publishing 
+                    FROM coupons 
+                    WHERE id = $1', 
+                    [id])
+  
+  if res.num_tuples == 0
+	status 404
+	return { :error => 'Coupon Not Found' }.to_json
+  end
+  
+  #if non-publishing, cannot unpublish
+  if (res[0][1] == false)
+    status 404
+    return { :error => 'Cannot unpublish a non-publishing coupon' }.to_json
+  end
+  
+  @conn.exec('UPDATE coupons
+              SET publishing = $1
+              WHERE id = $2',
+              [false, id])
+              
+  {:status => 'OK'}.to_json
+end   
 
 get '/api/ui/register' do
  return {
