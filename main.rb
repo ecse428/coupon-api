@@ -313,20 +313,33 @@ get '/api/coupons/purchased/:user_id' do |user_id|
   {:status => 'ok', :data => coupons}.to_json
 end
 
-post '/api/coupons/buy/:user_id/:id' do |user_id, id|
+post '/api/coupons/:id/buy' do |id|
   return if authenticate?(true) == false
-  
-  #if coupons.quantity < purchased_quantity then error: cannot purchase at this quantity
-  
+
+  res = @conn.exec('SELECT amount FROM coupons WHERE id = ?', [id])
+
+  if res.num_tuples == 0
+    status 404
+    return { :error => 'Coupon Not Found' }.to_json
+  end
+
+  amount = res.getvalue(0, 0)
+  if amount < @data['purchased_quantity']
+    status 400
+    return { :error => "There are only #{amount} available" }.to_json
+  end
+
   @conn.exec('INSERT INTO purchased_coupons (owner_id, creator_id, purchased_quantity, claimed_quantity, coupon_id)
-  			  VALUES ($1, $2, $3, $4, $5)',
-  			  [user_id, user_id, @data['purchased_quantity'], 0, id])
-  			  
-  #reduce the 'amount' of the purchased coupon
-  
+              VALUES ($1, $2, $3, $4, $5)',
+             [user_id, user_id, @data['purchased_quantity'], 0, id])
+
+  @conn.exec('UPDATE coupons
+              SET amount = ?
+              WHERE id = ?',
+             [amount - @data['purchased_quantity'], id])
+
   {:status => 'OK'}.to_json
 end
-  			  
 
 get '/api/ui/register' do
   return {
