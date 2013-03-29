@@ -49,7 +49,12 @@ end
 before do
   content_type :json
 
-  @conn = PG.connect(:dbname => 'coupon')
+  begin
+    @conn = PG.connect(:dbname => 'coupon')
+  rescue
+    halt 500, {:error => 'Cannot connect to the database'}.to_json
+  end
+
   @data = JSON.parse(request.body.read) rescue {}
 end
 
@@ -249,28 +254,13 @@ post '/api/coupons' do
 end
 
 get '/api/coupons' do
-  return if authenticate?(true) == false
-
   res = @conn.exec('SELECT id, name, description, logo_url, owner_id, amount, price, coupontype, expirydate, useramountlimit
                     FROM coupons', [])
 
   coupons = []
-  res.each { |row|
-    coupons.push(row)
-  }
-
-  {:status => 'OK', :data => coupons}.to_json
-end
-
-get '/api/coupons/all' do
-
-  res = @conn.exec('SELECT id, name, description, logo_url, owner_id, amount, price, coupontype, expirydate, useramountlimit
-                   FROM coupons')
-
-  coupons = []
   res.each { |row| coupons.push(row) }
 
-  {:status => 'ok', :data => coupons}.to_json
+  {:status => 'OK', :data => coupons}.to_json
 end
 
 get '/api/coupons/:id' do |id|
@@ -294,11 +284,6 @@ post '/api/user_search' do
   res = @conn.exec('SELECT id, username, email, firstname, lastname, address, phonenumber, suspended, accounttype FROM users
                     WHERE username LIKE $1', ['%' + @data['username'] + '%'])
 
-  if res.num_tuples == 0
-    status 202
-    return { :error => 'User Not Found' }.to_json
-  end
-
   users = []
   res.each { |row| users.push(row) }
 
@@ -311,11 +296,6 @@ post '/api/coupon_search' do
   res = @conn.exec('SELECT * FROM coupons
                     WHERE name LIKE $1', ['%' + @data['couponname'] + '%'])
 
-  if res.num_tuples == 0
-    status 202
-    return { :error => 'Coupon Not Found' }.to_json
-  end
-
   coupons = []
   res.each { |row| coupons.push(row) }
 
@@ -324,9 +304,9 @@ end
 
 get '/api/coupons/purchased/:user_id' do |user_id|
   res = @conn.exec('SELECT coupons.id, name, description, logo_url, coupons.owner_id, amount, price, coupontype, expirydate, useramountlimit 
-  					FROM coupons, purchased_coupons
-  					WHERE purchased_coupons.owner_id = $1 AND purchased_coupons.coupon_id = coupons.id', [user_id])
-  
+                    FROM coupons, purchased_coupons
+                    WHERE purchased_coupons.owner_id = $1 AND purchased_coupons.coupon_id = coupons.id', [user_id])
+
   coupons = []
   res.each { |row| coupons.push(row) }
 

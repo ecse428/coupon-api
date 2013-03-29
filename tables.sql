@@ -31,11 +31,11 @@ CREATE TABLE coupons (
 );
 
 CREATE TABLE purchased_coupons (
-	id serial PRIMARY KEY,
-	owner_id serial,
-	creator_id serial,
-	purchased_quantity integer,
-	claimed_quantity integer,
-	purchase_time date,
-	FOREIGN KEY (coupon_id) REFERENCES coupons(id)
+    id serial PRIMARY KEY,
+    owner_id serial,
+    coupon_id serial,
+    purchased_quantity integer,
+    claimed_quantity integer,
+    purchase_time date,
+    FOREIGN KEY (coupon_id) REFERENCES coupons(id)
 );
