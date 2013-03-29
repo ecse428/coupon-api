@@ -26,6 +26,8 @@ CREATE TABLE coupons (
     price float,
     expirydate date,
     useramountlimit integer,
+    published boolean,
+    publishing boolean,
     FOREIGN KEY (owner_id) REFERENCES users(id),
     FOREIGN KEY (creator_id) REFERENCES users(id)
 );
