@@ -333,9 +333,12 @@ end
 
 get '/api/coupons' do
  #I want (publishing = true OR owner_id = $1) AND amount > 0
+ split = request.cookies['user_key'].split(":")
+ @user_id = Integer(split[0])
+ 
  res = @conn.exec('SELECT id, name, description, logo_url, owner_id, amount, price, coupontype, expirydate, useramountlimit
 					FROM coupons
-					WHERE publishing = true AND amount > 0')
+					WHERE (publishing = true OR owner_id = $1) AND amount > 0', [@user_id])
 
  coupons = []
  res.each { |row| coupons.push(row) }
