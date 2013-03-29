@@ -332,22 +332,29 @@ delete '/api/coupons/:id' do |id|
 end
 
 get '/api/coupons' do
-  split = request.cookies['user_key'].split(":")
-  @user_id = Integer(split[0])
-
+  
+  @user_id = 0
+  
+  if authenticate?(false)
+	split = request.cookies['user_key'].split(":")
+	@user_id = Integer(split[0])
+  end
+  
   res = @conn.exec('SELECT id, name, description, logo_url, owner_id, amount, price, coupontype, expirydate, useramountlimit
                     FROM coupons
                     WHERE (publishing = true OR owner_id = $1) AND amount > 0', [@user_id])
-
   coupons = []
-  res.each { |row| coupons.push(row) }
-
+  res.each { |row| coupons.push(row) }                
   {:status => 'OK', :data => coupons}.to_json
 end
 
 get '/api/mycoupons' do
-  split = request.cookies['user_key'].split(":")
-  @user_id = Integer(split[0])
+  @user_id = 0
+  
+  if authenticate?(false)
+	split = request.cookies['user_key'].split(":")
+	@user_id = Integer(split[0])
+  end
 
   res = @conn.exec('SELECT id, name, description, logo_url, owner_id, amount, price, coupontype, expirydate, useramountlimit, published, publishing
                     FROM coupons
