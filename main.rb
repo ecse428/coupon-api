@@ -246,16 +246,14 @@ post '/api/coupons' do
               VALUES ($1, $2, $3, $4, $5, $6, $7, $8)',
               [@data['name'], @data['description'], @data['logo_url'], @user_id, @user_id, 1, @data['price'], @data['date']])
 
-#  @conn.exec('INSERT INTO coupons (name, description, logo_url, owner_id, creator_id, amount, price, coupontype, expirydate, useramountlimit)
-#              VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)',
-#              [@data['name'], @data['description'], @data['logo_url'], @user_id, @user_id, 1, @data['price'], @data['coupontype'], @data['expirydate'], @data['useramountlimit']])
   status 201
   { :status => 'CREATED' }.to_json
 end
 
 get '/api/coupons' do
   res = @conn.exec('SELECT id, name, description, logo_url, owner_id, amount, price, coupontype, expirydate, useramountlimit
-                    FROM coupons', [])
+                    FROM coupons
+                    WHERE amount > 0', [])
 
   coupons = []
   res.each { |row| coupons.push(row) }
@@ -316,27 +314,29 @@ end
 post '/api/coupons/:id/buy' do |id|
   return if authenticate?(true) == false
 
-  res = @conn.exec('SELECT amount FROM coupons WHERE id = ?', [id])
+  purchased = Integer(@data['purchased_quantity']) rescue 0
+
+  res = @conn.exec('SELECT amount FROM coupons WHERE id = $1', [id])
 
   if res.num_tuples == 0
     status 404
     return { :error => 'Coupon Not Found' }.to_json
   end
 
-  amount = res.getvalue(0, 0)
-  if amount < @data['purchased_quantity']
+  amount = Integer(res.getvalue(0, 0))
+  if amount < purchased
     status 400
     return { :error => "There are only #{amount} available" }.to_json
   end
 
-  @conn.exec('INSERT INTO purchased_coupons (owner_id, creator_id, purchased_quantity, claimed_quantity, coupon_id)
+  @conn.exec('INSERT INTO purchased_coupons (owner_id, coupon_id, purchased_quantity, claimed_quantity, purchase_time)
               VALUES ($1, $2, $3, $4, $5)',
-             [user_id, user_id, @data['purchased_quantity'], 0, id])
+             [@user_id, id, purchased, 0, Time.new])
 
   @conn.exec('UPDATE coupons
-              SET amount = ?
-              WHERE id = ?',
-             [amount - @data['purchased_quantity'], id])
+              SET amount = $1
+              WHERE id = $2',
+             [amount - purchased, id])
 
   {:status => 'OK'}.to_json
 end
