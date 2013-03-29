@@ -648,8 +648,8 @@ get '/api/ui/managecoupon' do
  return {
 	:status => 'OK',
 	:tmpl => {
-	 :nav => (erb :purchasedcoupon_nav, :layout => :nulllayout),
-	 :content => (erb :purchasedcoupon_content, :layout => :nulllayout)
+	 :nav => (erb :managecoupon_nav, :layout => :nulllayout),
+	 :content => (erb :managecoupon_content, :layout => :nulllayout)
 	}
  }.to_json
 end
