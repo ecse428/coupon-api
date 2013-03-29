@@ -7,7 +7,7 @@ SECRET = 'S3KR3T-K3Y'
 
 set :public_folder, '../coupon-client'
 set :views, '../coupon-client/views'
-
+use Rack::MethodOverride
 
 get '/' do
  content_type 'text/html'
@@ -281,7 +281,7 @@ put '/api/coupons/:id' do |id|
  res = @conn.exec('SELECT id
 					FROM coupons
 					WHERE description = $1
-					AND logo_url = $2 AND name = $3 AND id != $4', 
+					AND logo_url = $2 AND name = $3 AND id <> $4', 
 					[@data['description'], @data['logo_url'], @data['name'], id])
 
  if res.num_tuples != 0
@@ -321,7 +321,14 @@ put '/api/coupons/:id' do |id|
  
  status 201
  { :status => 'MODIFIED' }.to_json
+end
 
+delete '/api/coupons/:id' do |id|
+  return if authenticate?(true) == false
+  @conn.exec('DELETE FROM coupons WHERE id = $1', [id])
+			  
+  status 201
+  { :status => 'DELETED' }.to_json 
 end
 
 get '/api/coupons' do
@@ -541,6 +548,16 @@ get '/api/ui/editcoupon' do
 	:tmpl => {
 	 :nav => (erb :editcoupon_nav, :layout => :nulllayout),
 	 :content => (erb :editcoupon_content, :layout => :nulllayout)
+	}
+ }.to_json
+end
+
+get '/api/ui/deletecoupon' do
+ return {
+	:status => 'OK',
+	:tmpl => {
+	 :nav => (erb :deletecoupon_nav, :layout => :nulllayout),
+	 :content => (erb :deletecoupon_content, :layout => :nulllayout)
 	}
  }.to_json
 end
