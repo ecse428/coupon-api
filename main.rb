@@ -21,13 +21,13 @@ end
 
 def authenticate?(status)
   if request.cookies['key'].nil? || request.cookies['user_key'].nil?
-  if status == true
-    status 403
-    response.write({ :error => '"user_key" and "key" Cookie Required' }.to_json)
-    response.close()
+    if status == true
+      status 403
+      response.write({ :error => '"user_key" and "key" Cookie Required' }.to_json)
+      response.close()
     end
-  return false
-end
+    return false
+  end
 
   auth = BCrypt::Password.new(request.cookies['key'])
   if auth != (request.cookies['user_key'] + SECRET)
@@ -35,9 +35,9 @@ end
     status 403
     response.write({ :error => 'Invalid Key' }.to_json)
     response.close()
+    end
+    return false
   end
-  return false
-end
 
   split = request.cookies['user_key'].split(":")
   @user_id = Integer(split[0])
@@ -220,7 +220,7 @@ post '/api/coupons' do
   if @data['logo_url'].length < 3
     status 400
     return { :error => 'Logo url too short < 3!' }.to_json
- end
+  end
 
   if @data['description'].length < 0
     status 400
@@ -277,7 +277,7 @@ put '/api/coupons/:id' do |id|
     status 400
     return { :error => 'Description Length > 1000' }.to_json
   end
- 
+
   res = @conn.exec('SELECT id
                     FROM coupons
                     WHERE description = $1
@@ -288,37 +288,37 @@ put '/api/coupons/:id' do |id|
     status 400
     return { :error => 'Coupon Already Exists' }.to_json
   end
- 
+
   if @data['name'] != nil and @data['name'] != ''
     @conn.exec('UPDATE coupons SET name=$1
                 WHERE id = $2', [@data['name'], id])
   end
- 
+
   if @data['description'] != nil and @data['description'] != ''
     @conn.exec('UPDATE coupons SET description=$1
                 WHERE id = $2', [@data['description'], id])
   end
- 
+
   if @data['logo_url'] != nil and @data['logo_url'] != ''
     @conn.exec('UPDATE coupons SET logo_url=$1
                 WHERE id = $2', [@data['logo_url'], id])
   end
- 
+
   if @data['amount'] != nil and @data['amount'] != ''
     @conn.exec('UPDATE coupons SET amount=$1
                 WHERE id = $2', [@data['amount'], id])
   end
- 
+
   if @data['price'] != nil and @data['price'] != ''
     @conn.exec('UPDATE coupons SET price=$1
                 WHERE id = $2', [@data['price'], id])
   end
- 
+
   if @data['logo_url'] != nil and @data['date'] != ''
     @conn.exec('UPDATE coupons SET date=$1
                 WHERE id = $2', [@data['date'], id])
   end
- 
+
   status 201
   { :status => 'MODIFIED' }.to_json
 end
@@ -326,15 +326,15 @@ end
 delete '/api/coupons/:id' do |id|
   return if authenticate?(true) == false
   @conn.exec('DELETE FROM coupons WHERE id = $1', [id])
-                
+
   status 201
-  { :status => 'DELETED' }.to_json 
+  { :status => 'DELETED' }.to_json
 end
 
 get '/api/coupons' do
   split = request.cookies['user_key'].split(":")
   @user_id = Integer(split[0])
- 
+
   res = @conn.exec('SELECT id, name, description, logo_url, owner_id, amount, price, coupontype, expirydate, useramountlimit
                     FROM coupons
                     WHERE (publishing = true OR owner_id = $1) AND amount > 0', [@user_id])
@@ -451,63 +451,63 @@ end
 
 put '/api/coupons/publish/:id' do |id|
   return if authenticate?(true) == false
-    
-  res = @conn.exec('SELECT published, publishing 
-                    FROM coupons 
-                    WHERE id = $1', 
+
+  res = @conn.exec('SELECT published, publishing
+                    FROM coupons
+                    WHERE id = $1',
                     [id])
-    
+
   if res.num_tuples == 0
     status 404
     return { :error => 'Coupon Not Found' }.to_json
-    end
-    
-    #if published before, cannot re-publish
-    if (res.getvalue(0,0) == true)
-        status 404
-        return { :error => 'Cannot Re-Publish Coupon' }.to_json
-    end
-    
-    #if being published right now, cannot publish
-    if (res[0][1] == true)
-        status 404
-        return { :error => 'Cannot Publish Publishing Coupon' }.to_json
-    end
-    
-    @conn.exec('UPDATE coupons
-                SET published = $1, publishing = $2
-                WHERE id = $3',
-                [true, true, id])
-                            
+  end
+
+  #if published before, cannot re-publish
+  if (res.getvalue(0,0) == true)
+      status 404
+      return { :error => 'Cannot Re-Publish Coupon' }.to_json
+  end
+
+  #if being published right now, cannot publish
+  if (res[0][1] == true)
+      status 404
+      return { :error => 'Cannot Publish Publishing Coupon' }.to_json
+  end
+
+  @conn.exec('UPDATE coupons
+              SET published = $1, publishing = $2
+              WHERE id = $3',
+              [true, true, id])
+
   {:status => 'OK'}.to_json
 end
 
 put '/api/coupons/unpublish/:id' do |id|
   return if authenticate?(true) == false
-    
-  res = @conn.exec('SELECT published, publishing 
-                    FROM coupons 
-                    WHERE id = $1', 
+
+  res = @conn.exec('SELECT published, publishing
+                    FROM coupons
+                    WHERE id = $1',
                     [id])
-    
+
   if res.num_tuples == 0
     status 404
     return { :error => 'Coupon Not Found' }.to_json
   end
-    
-    #if non-publishing, cannot unpublish
+
+  #if non-publishing, cannot unpublish
   if (res[0][1] == false)
     status 404
     return { :error => 'Cannot unpublish a non-publishing coupon' }.to_json
   end
-    
+
   @conn.exec('UPDATE coupons
               SET publishing = $1
               WHERE id = $2',
               [false, id])
-                            
+
   {:status => 'OK'}.to_json
-end     
+end
 
 get '/api/ui/register' do
   return {
